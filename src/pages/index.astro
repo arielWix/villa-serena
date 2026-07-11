@@ -88,7 +88,8 @@ const ICONS: Record<string, string> = {
 const iconSvg = (key?: string) =>
   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[key ?? ""] ?? ICONS.concierge}</svg>`;
 
-const origin = Astro.url.origin;
+// behind the Wix proxy Astro.url reports http — canonical/OG URLs must be https
+const origin = Astro.url.origin.replace(/^http:/, "https:");
 const canonical = origin + "/";
 const pageTitle = "Villa Serena — A Private Mediterranean Estate";
 const pageDescription =
@@ -875,7 +876,11 @@ const galleryImages = [
       document.querySelectorAll("[data-split]").forEach((el) => {
         const text = el.textContent || "";
         el.textContent = "";
-        el.setAttribute("aria-label", text);
+        // aria-label is prohibited on a generic span — expose the text via an sr-only node instead
+        const sr = document.createElement("span");
+        sr.className = "sr-only";
+        sr.textContent = text;
+        el.appendChild(sr);
         text.split("").forEach((ch, i) => {
           const span = document.createElement("span");
           span.className = "ch";
