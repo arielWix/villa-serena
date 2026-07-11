@@ -11,6 +11,7 @@ const isBuild = process.env.NODE_ENV == "production";
 export default defineConfig({
   integrations: [wix(), wixPages(), react()],
   security: { checkOrigin: false },
+  build: { inlineStylesheets: "always" },
   ...(isBuild && { adapter: cloudProviderFetchAdapter({}) }),
 
   image: {
