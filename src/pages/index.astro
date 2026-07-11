@@ -1,39 +1,15 @@
 ---
-import { items } from "@wix/data";
-
-interface SectionRow {
-  sectionKey?: string;
-  overline?: string;
-  title?: string;
-  body?: string;
-  attribution?: string;
-}
-interface AmenityRow {
-  title?: string;
-  description?: string;
-  icon?: string;
-  zone?: string;
-}
-interface StatRow {
-  label?: string;
-  value?: string;
-}
+import { getContent, type SectionRow, type AmenityRow, type StatRow } from "../lib/content";
 
 let amenities: AmenityRow[] = [];
 let stats: StatRow[] = [];
-const sections: Record<string, SectionRow> = {};
+let sections: Record<string, SectionRow> = {};
 
 try {
-  const [a, s, st] = await Promise.all([
-    items.query("amenities").ascending("order").limit(50).find(),
-    items.query("villa-sections").ascending("order").limit(50).find(),
-    items.query("villa-stats").ascending("order").limit(50).find(),
-  ]);
-  amenities = (a.items as AmenityRow[]) ?? [];
-  stats = (st.items as StatRow[]) ?? [];
-  for (const row of (s.items as SectionRow[]) ?? []) {
-    if (row.sectionKey) sections[row.sectionKey] = row;
-  }
+  const content = await getContent();
+  amenities = content.amenities;
+  stats = content.stats;
+  sections = content.sections;
 } catch (e) {
   console.error("CMS fetch failed, using fallback copy", e);
 }
@@ -112,6 +88,35 @@ const ICONS: Record<string, string> = {
 const iconSvg = (key?: string) =>
   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[key ?? ""] ?? ICONS.concierge}</svg>`;
 
+const origin = Astro.url.origin;
+const canonical = origin + "/";
+const pageTitle = "Villa Serena — A Private Mediterranean Estate";
+const pageDescription =
+  "Villa Serena — a private luxury villa for rent. Five suites, an 18-metre infinity pool and a chef's kitchen, framed by olive groves and sea light.";
+const ogImage = origin + "/gallery/villa-01.webp";
+const jsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "LodgingBusiness",
+  name: "Villa Serena",
+  description: pageDescription,
+  url: canonical,
+  image: [1, 2, 3, 4, 5].map((n) => `${origin}/gallery/villa-0${n}.webp`),
+  numberOfRooms: 5,
+  amenityFeature: [
+    { "@type": "LocationFeatureSpecification", name: "Infinity Pool", value: true },
+    { "@type": "LocationFeatureSpecification", name: "Chef's Kitchen", value: true },
+    { "@type": "LocationFeatureSpecification", name: "Spa & Sauna", value: true },
+    { "@type": "LocationFeatureSpecification", name: "Concierge", value: true },
+  ],
+});
+const faviconSvg =
+  "data:image/svg+xml," +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#0e0d0c"/><text x="32" y="44" font-family="Georgia,serif" font-size="36" fill="#c89848" text-anchor="middle">V</text></svg>'
+  );
+const fontsHref =
+  "https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Playfair+Display:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap";
+
 const galleryImages = [
   { src: "/gallery/villa-01.webp", alt: "Villa Serena — the estate at golden hour", tall: true, parallax: -14 },
   { src: "/gallery/villa-02.webp", alt: "The terrace and infinity pool", tall: false, parallax: 10 },
@@ -126,17 +131,33 @@ const galleryImages = [
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Villa Serena — A Private Mediterranean Estate</title>
-    <meta
-      name="description"
-      content="Villa Serena — a private luxury villa for rent. Five suites, an 18-metre infinity pool and a chef's kitchen, framed by olive groves and sea light."
-    />
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href={faviconSvg} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Villa Serena" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={pageDescription} />
+    <meta name="twitter:image" content={ogImage} />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Playfair+Display:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap"
-      rel="stylesheet"
-    />
+    <!-- non-blocking font load: render starts on fallback serif/sans, swaps when ready -->
+    <link rel="preload" as="style" href={fontsHref} />
+    <link rel="stylesheet" href={fontsHref} media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href={fontsHref} /></noscript>
+
+    <link rel="preload" as="image" href="/frames/zone1/desktop/frame-0001.webp" media="(min-width: 901px)" />
+    <link rel="preload" as="image" href="/frames/zone1/mobile/frame-0001.webp" media="(max-width: 900px)" />
+
+    <script type="application/ld+json" set:html={jsonLd} />
   </head>
   <body>
     <!-- custom cursor -->
@@ -178,8 +199,14 @@ const galleryImages = [
 
         <div class="overlay overlay-left" data-show="0.00" data-hide="0.30">
           <div class="overline">{hero.overline}</div>
-          <h1 class="hero-title" data-split>{hero.title}</h1>
+          <h1 class="hero-title">
+            <span data-split>{hero.title}</span>
+            <span class="sr-only">— a private luxury villa rental on the Mediterranean coast</span>
+          </h1>
           <p class="hero-tag">{hero.body}</p>
+          <div class="hero-cta">
+            <a class="btn-primary" href="#reserve">Reserve Your Stay</a>
+          </div>
           <div class="stat-bar" id="stat-bar">
             {stats.map((s) => (
               <div class="stat">
@@ -469,9 +496,15 @@ const galleryImages = [
         font-family: var(--heading); font-weight: 300; line-height: 1.05;
         font-size: clamp(42px, 5.5vw, 76px); margin-bottom: 18px;
       }
-      .hero-title .ch { display: inline-block; opacity: 0; transform: translateY(0.4em); transition: opacity 0.5s ease, transform 0.5s ease; }
-      .hero-title.split-done .ch { opacity: 1; transform: translateY(0); }
+      [data-split] .ch { display: inline-block; opacity: 0; transform: translateY(0.4em); transition: opacity 0.5s ease, transform 0.5s ease; }
+      [data-split].split-done .ch { opacity: 1; transform: translateY(0); }
       .hero-tag { color: var(--warm-white-dim); font-size: clamp(15px, 1.4vw, 18px); line-height: 1.7; max-width: 44ch; }
+      .hero-cta { margin-top: 26px; }
+      .hero-cta .btn-primary { display: inline-block; text-decoration: none; }
+      .sr-only {
+        position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+        overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+      }
 
       .stat-bar {
         display: flex; gap: 0; margin-top: 34px; border: 1px solid rgba(244, 240, 234, 0.06);
@@ -585,7 +618,7 @@ const galleryImages = [
 
       footer { background: #131110; padding: 60px 0 46px; text-align: center; }
       .footer-brand { font-family: var(--heading); letter-spacing: 0.3em; text-transform: uppercase; font-size: 15px; color: var(--warm-white-dim); }
-      .footer-legal { margin-top: 12px; font-size: 11px; color: var(--stone); letter-spacing: 0.06em; }
+      .footer-legal { margin-top: 12px; font-size: 11px; color: var(--concrete-dim); letter-spacing: 0.06em; }
 
       /* reduced motion */
       @media (prefers-reduced-motion: reduce) {

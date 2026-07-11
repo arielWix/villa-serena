@@ -26,6 +26,9 @@ export const POST: APIRoute = async ({ request }) => {
   } catch {
     return json({ ok: false, error: "Invalid request body" }, 400);
   }
+  if (typeof data !== "object" || data === null || Array.isArray(data)) {
+    return json({ ok: false, error: "Invalid request body" }, 400);
+  }
 
   const values: Record<string, string> = {};
   for (const target of TARGETS) {
