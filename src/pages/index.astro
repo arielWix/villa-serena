@@ -497,6 +497,7 @@ const galleryImages = [
         font-family: var(--heading); font-weight: 300; line-height: 1.05;
         font-size: clamp(42px, 5.5vw, 76px); margin-bottom: 18px;
       }
+      [data-split] .word { display: inline-block; white-space: nowrap; }
       [data-split] .ch { display: inline-block; opacity: 0; transform: translateY(0.4em); transition: opacity 0.5s ease, transform 0.5s ease; }
       [data-split].split-done .ch { opacity: 1; transform: translateY(0); }
       .hero-tag { color: var(--warm-white-dim); font-size: clamp(15px, 1.4vw, 18px); line-height: 1.7; max-width: 44ch; }
@@ -881,13 +882,25 @@ const galleryImages = [
         sr.className = "sr-only";
         sr.textContent = text;
         el.appendChild(sr);
-        text.split("").forEach((ch, i) => {
-          const span = document.createElement("span");
-          span.className = "ch";
-          span.setAttribute("aria-hidden", "true");
-          span.textContent = ch === " " ? " " : ch;
-          span.style.transitionDelay = `${i * 35}ms`;
-          el.appendChild(span);
+        // group letters into word spans so lines can only break at spaces, never mid-word
+        let ci = 0;
+        text.split(" ").forEach((word, wi, words) => {
+          const w = document.createElement("span");
+          w.className = "word";
+          w.setAttribute("aria-hidden", "true");
+          word.split("").forEach((ch) => {
+            const span = document.createElement("span");
+            span.className = "ch";
+            span.textContent = ch;
+            span.style.transitionDelay = `${ci * 35}ms`;
+            ci++;
+            w.appendChild(span);
+          });
+          el.appendChild(w);
+          if (wi < words.length - 1) {
+            el.appendChild(document.createTextNode(" "));
+            ci++;
+          }
         });
       });
       setTimeout(() => document.querySelectorAll("[data-split]").forEach((el) => el.classList.add("split-done")), 600);
