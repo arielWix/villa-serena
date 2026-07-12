@@ -591,6 +591,10 @@ const galleryImages = [
       }
       .glass-form input:focus, .glass-form select:focus, .glass-form textarea:focus { border-color: var(--accent); }
       .form-actions { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-top: 6px; }
+      @media (max-width: 640px) {
+        .form-actions { flex-direction: column; }
+        .form-actions .btn-primary, .form-actions .btn-ghost { width: 100%; text-align: center; }
+      }
       .btn-primary {
         background: var(--accent); color: var(--ink); border: 1px solid var(--accent);
         font-family: var(--body); font-weight: 500; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase;
