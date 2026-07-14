@@ -101,7 +101,7 @@ const jsonLd = JSON.stringify({
   name: "Villa Serena",
   description: pageDescription,
   url: canonical,
-  image: [1, 2, 3, 4, 5].map((n) => `${origin}/gallery/villa-0${n}.webp`),
+  image: [1, 2, 3, 4].map((n) => `${origin}/gallery/villa-0${n}.webp`),
   numberOfRooms: 5,
   amenityFeature: [
     { "@type": "LocationFeatureSpecification", name: "Infinity Pool", value: true },
@@ -119,11 +119,10 @@ const fontsHref =
   "https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Playfair+Display:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap";
 
 const galleryImages = [
-  { src: "/gallery/villa-01.webp", alt: "Villa Serena — the estate at golden hour", tall: true, parallax: -14 },
-  { src: "/gallery/villa-02.webp", alt: "The terrace and infinity pool", tall: false, parallax: 10 },
-  { src: "/gallery/villa-03.webp", alt: "The living spaces at dusk", tall: false, parallax: -8 },
-  { src: "/gallery/villa-04.webp", alt: "The kitchen and dining island", tall: true, parallax: 12 },
-  { src: "/gallery/villa-05.webp", alt: "Evening light across the villa", tall: false, parallax: -10 },
+  { src: "/gallery/villa-01.webp", alt: "Villa Serena — the estate and infinity pool at golden hour", tall: true, parallax: -14 },
+  { src: "/gallery/villa-02.webp", alt: "The living room, fireplace and sea view", tall: false, parallax: 10 },
+  { src: "/gallery/villa-03.webp", alt: "The chef's kitchen and marble island at sunset", tall: true, parallax: 12 },
+  { src: "/gallery/villa-04.webp", alt: "The master suite at dusk", tall: false, parallax: -8 },
 ];
 ---
 
