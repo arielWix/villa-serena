@@ -509,7 +509,8 @@ const galleryImages = [
 
       .stat-bar {
         display: flex; gap: 0; margin-top: 34px; border: 1px solid rgba(244, 240, 234, 0.06);
-        background: rgba(244, 240, 234, 0.03); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        /* solid, not backdrop-filter: a blur over the animating canvas re-blurs on every frame draw */
+        background: rgba(20, 18, 16, 0.55);
       }
       .stat { flex: 1; padding: 16px 18px; text-align: center; border-right: 1px solid rgba(244, 240, 234, 0.06); }
       .stat:last-child { border-right: none; }
@@ -645,11 +646,12 @@ const galleryImages = [
       const IS_MOBILE = window.matchMedia("(max-width: 900px), (hover: none)").matches;
       const FRAME_COUNT = 120;
       // mobile: snappier follow, gentler dwell, and a 1x canvas (mobile frames are 960x540 anyway)
-      const LERP_FACTOR = IS_MOBILE ? 0.16 : 0.09;
+      const LERP_FACTOR = IS_MOBILE ? 0.16 : 0.13;
       const DWELL_WIDTH = 0.045;
-      const DWELL_PEAK = IS_MOBILE ? 2.2 : 3.5;
+      const DWELL_PEAK = IS_MOBILE ? 2.2 : 2.8;
       const REMAP_N = 2000;
-      const DPR = IS_MOBILE ? 1 : Math.min(window.devicePixelRatio || 1, 2);
+      // backing store above ~1.5x buys nothing (720p source) and doubles per-frame draw cost on retina
+      const DPR = IS_MOBILE ? 1 : Math.min(window.devicePixelRatio || 1, 1.5);
       const DIR = IS_MOBILE ? "mobile" : "desktop";
 
       const framePath = (zone: number, i: number) =>
@@ -726,6 +728,9 @@ const galleryImages = [
           const w = this.canvas.clientWidth, h = this.canvas.clientHeight;
           this.canvas.width = Math.round(w * DPR);
           this.canvas.height = Math.round(h * DPR);
+          // setting width resets context state — reapply the upscale filter
+          this.ctx.imageSmoothingEnabled = true;
+          this.ctx.imageSmoothingQuality = "high";
         }
 
         async loadFrame(i: number): Promise<void> {
