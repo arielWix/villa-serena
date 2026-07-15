@@ -702,23 +702,33 @@ const galleryImages = [
           this.ctx.imageSmoothingQuality = "high";
         }
 
+        async fetchFrame(i: number): Promise<void> {
+          const res = await fetch(framePath(this.zone, i));
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const blob = await res.blob();
+          this.frames[i] = typeof createImageBitmap === "function"
+            ? await createImageBitmap(blob)
+            : await new Promise<HTMLImageElement>((resolve, reject) => {
+                const img = new Image();
+                const url = URL.createObjectURL(blob);
+                img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+                img.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
+                img.src = url;
+              });
+        }
+
         async loadFrame(i: number): Promise<void> {
           if (this.frames[i]) return;
           try {
-            const res = await fetch(framePath(this.zone, i));
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const blob = await res.blob();
-            this.frames[i] = typeof createImageBitmap === "function"
-              ? await createImageBitmap(blob)
-              : await new Promise<HTMLImageElement>((resolve, reject) => {
-                  const img = new Image();
-                  const url = URL.createObjectURL(blob);
-                  img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
-                  img.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
-                  img.src = url;
-                });
+            await this.fetchFrame(i);
           } catch {
-            this.frames[i] = null; // nearest-neighbor fallback covers gaps
+            // one retry — the CDN occasionally 500s on cold-cache fills right after a release
+            try {
+              await new Promise((r) => setTimeout(r, 800));
+              await this.fetchFrame(i);
+            } catch {
+              this.frames[i] = null; // nearest-neighbor fallback covers gaps
+            }
           }
           this.loaded++;
           this.onProgress?.(this.loaded, FRAME_COUNT);
@@ -727,9 +737,11 @@ const galleryImages = [
         async load(criticalDone?: () => void) {
           if (this.started) return;
           this.started = true;
+          // first frame gets the network to itself — earliest possible paint on slow connections
+          await this.loadFrame(0);
           // critical pass: every 4th frame
           const critical: number[] = [];
-          for (let i = 0; i < FRAME_COUNT; i += 4) critical.push(i);
+          for (let i = 4; i < FRAME_COUNT; i += 4) critical.push(i);
           await Promise.all(critical.map((i) => this.loadFrame(i)));
           this.lastDrawn = -1; // force first paint
           criticalDone?.();
@@ -751,14 +763,15 @@ const galleryImages = [
           return null;
         }
 
-        draw(index: number) {
+        draw(index: number): boolean {
           const img = this.nearestFrame(index);
-          if (!img) return;
+          if (!img) return false;
           const cw = this.canvas.width, ch = this.canvas.height;
           const iw = (img as ImageBitmap).width, ih = (img as ImageBitmap).height;
           const scale = Math.max(cw / iw, ch / ih);
           const dw = iw * scale, dh = ih * scale;
           this.ctx.drawImage(img as CanvasImageSource, (cw - dw) / 2, (ch - dh) / 2, dw, dh);
+          return true;
         }
 
         tick() {
@@ -773,8 +786,9 @@ const galleryImages = [
           this.current += (target - this.current) * LERP_FACTOR;
           if (Math.abs(target - this.current) < 0.4) this.current = target;
           const idx = Math.round(this.current);
-          if (idx !== this.lastDrawn) {
-            this.draw(idx);
+          // only mark drawn when a frame actually painted — otherwise retry every
+          // tick, so the film appears the moment the first frame arrives
+          if (idx !== this.lastDrawn && this.draw(idx)) {
             this.lastDrawn = idx;
           }
           for (const o of this.overlays) {
