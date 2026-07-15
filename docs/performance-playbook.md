@@ -9,17 +9,17 @@ knobs to tune. Everything lives in [src/pages/index.astro](../src/pages/index.as
 
 | Decision | Value | Why |
 |---|---|---|
-| Structure | 520vh (desktop) / 380vh (mobile) zone + `position: sticky` 100svh stage | consensus architecture; `svh` avoids mobile URL-bar resize thrash |
-| Frames | 120/zone, WebP, q82 desktop (1280×720) / q72 mobile (960×540) | WebP decodes faster than AVIF — decode cost dominates in a scrub |
+| Structure | 640vh (desktop) / 460vh (mobile) single zone + `position: sticky` 100svh stage | consensus architecture; `svh` avoids mobile URL-bar resize thrash |
+| Frames | 120, WebP, q82 desktop (1280×720) / q72 mobile (960×540) | WebP decodes faster than AVIF — decode cost dominates in a scrub |
 | Scroll handling | passive reading via rAF loop; draw only when frame index changes | never draw in the scroll event |
 | Smoothing | lerp `0.13` desktop / `0.16` mobile + Gaussian dwell remap (`DWELL_PEAK` 2.8/2.2) | cinematic catch-up feel; dwells make the film "almost stop" at content |
 | DPR | capped at 1.5 desktop, 1 mobile | >1.5× buys nothing from a 720p source and multiplies draw cost |
-| Loading | every-4th frame first (loader gate), rest in batches of 10; zone 2 lazy via IntersectionObserver at 150% rootMargin | first paint fast, full fidelity streams in |
+| Loading | every-4th frame first (loader gate), rest in batches of 10 | first paint fast, full fidelity streams in |
 | Gaps | `nearestFrame()` fallback | fast flicks draw the closest decoded frame instead of stalling |
 | Layout reads | one `getBoundingClientRect` per zone per rAF tick | onscreen check + progress share the same rect |
 | Reduced motion | static frame 0, all overlays visible, no rAF loops | `prefers-reduced-motion` consensus |
 
-**Memory model**: all 120 frames per zone are decoded and retained. That is safe at
+**Memory model**: all 120 frames are decoded and retained. That is safe at
 720p (≈3.7 MB/frame decoded desktop → ~440 MB worst case across both zones on
 desktop; mobile uses 960×540 ≈ 2 MB/frame). For true 1080p sources this would exceed
 iOS budgets — the windowed decoder on branch `feat/windowed-frame-decoder` (16-frame

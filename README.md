@@ -10,21 +10,20 @@ Lighthouse: **96 performance · 100 accessibility · 100 best practices · 100 S
 
 ### Scroll animation
 
-The page has two animation zones, one per source video:
+The page has one animation zone: a continuous AI-generated FPV flythrough
+(exterior → living room → kitchen → bedroom) with four overlay stops — hero,
+vision quote, kitchen, and rooms.
 
-- **Zone 1 — The Villa** (exterior / living spaces): hero, vision quote, living overlay
-- **Zone 2 — The Kitchen**: kitchen hero, craft overlay, location finale
-
-Each zone is a tall (`520vh`, `380vh` on mobile) section with a `position: sticky` full-viewport canvas. A `requestAnimationFrame` loop maps scroll progress to a frame index through:
+The zone is a tall (`640vh`, `460vh` on mobile) section with a `position: sticky` full-viewport canvas. A `requestAnimationFrame` loop maps scroll progress to a frame index through:
 
 1. **A dwell engine** — a Gaussian-density remap that makes the scroll "almost stop" at each content overlay and speed up between them, so text has natural reading pauses.
 2. **LERP smoothing** — the drawn frame eases toward the target frame; the canvas only redraws when the rounded index changes.
 
-Frames load progressively: every 4th frame first (behind a branded loader), the rest in batches. Zone 2 doesn't load at all until you scroll near it. Missing frames fall back to the nearest loaded neighbour, so there are never blank paints. `prefers-reduced-motion` gets a static, fully readable page.
+Frames load progressively: every 4th frame first (behind a branded loader), the rest in batches. Missing frames fall back to the nearest loaded neighbour, so there are never blank paints. `prefers-reduced-motion` gets a static, fully readable page.
 
 ### Frames
 
-Each 10s / 24fps / 720p video became 120 frames × 2 sizes:
+The 10s / 24fps / 1080p flythrough (generated with Higgsfield Seedance 2.0 from four reference stills) became 120 frames × 2 sizes:
 
 | Variant | Resolution | Quality | Payload per zone |
 |---|---|---|---|
@@ -57,7 +56,6 @@ src/
     content.ts         # CMS queries + 5-min SSR cache
 public/
   frames/zone1/{desktop,mobile}/   # 120 WebP frames each
-  frames/zone2/{desktop,mobile}/
   gallery/                         # optimized gallery photos
 astro.config.mjs       # Wix integrations (do not remove wixPages/checkOrigin)
 wix.config.json        # Wix site link (siteId / appId)
@@ -91,7 +89,7 @@ All knobs live at the top of the `<script>` in `index.astro`:
 
 ### Regenerating frames
 
-Frames were extracted with ffmpeg + Pillow (WebP). To re-extract from new footage, produce evenly spaced frames named `frame-0001.webp … frame-0120.webp` at the two resolutions above and drop them into `public/frames/zone{1,2}/`.
+Frames were extracted with ffmpeg + Pillow (WebP). To re-extract from new footage, produce evenly spaced frames named `frame-0001.webp … frame-0120.webp` at the two resolutions above and drop them into `public/frames/zone1/`.
 
 ## Performance notes
 
