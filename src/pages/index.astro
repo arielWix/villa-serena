@@ -110,11 +110,6 @@ const jsonLd = JSON.stringify({
     { "@type": "LocationFeatureSpecification", name: "Concierge", value: true },
   ],
 });
-const faviconSvg =
-  "data:image/svg+xml," +
-  encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#0e0d0c"/><text x="32" y="44" font-family="Georgia,serif" font-size="36" fill="#c89848" text-anchor="middle">V</text></svg>'
-  );
 const fontsHref =
   "https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Playfair+Display:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap";
 
@@ -134,14 +129,18 @@ const galleryImages = [
     <title>{pageTitle}</title>
     <meta name="description" content={pageDescription} />
     <link rel="canonical" href={canonical} />
-    <link rel="icon" type="image/svg+xml" href={faviconSvg} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#0e0d0c" />
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Villa Serena" />
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={pageDescription} />
     <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1600" />
+    <meta property="og:image:height" content="873" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={pageDescription} />
@@ -278,7 +277,7 @@ const galleryImages = [
           {amenities.map((a) => (
             <div class="glass-cell reveal">
               <div class="amenity-icon" set:html={iconSvg(a.icon)} />
-              <div class="amenity-title">{a.title}</div>
+              <h3 class="amenity-title">{a.title}</h3>
               <div class="amenity-desc">{a.description}</div>
             </div>
           ))}
@@ -555,7 +554,7 @@ const galleryImages = [
       .glass-cell:hover { background: rgba(244, 240, 234, 0.06); border-color: rgba(200, 152, 72, 0.35); transform: translateY(-3px); }
       .amenity-icon { width: 30px; height: 30px; color: var(--accent); margin-bottom: 18px; }
       .amenity-icon svg { width: 100%; height: 100%; }
-      .amenity-title { font-family: var(--heading); font-size: 19px; margin-bottom: 9px; }
+      .amenity-title { font-family: var(--heading); font-weight: 400; font-size: 19px; margin-bottom: 9px; }
       .amenity-desc { font-size: 13px; line-height: 1.65; color: var(--concrete-dim); }
 
       .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: 220px; gap: 14px; margin-top: 44px; }
@@ -699,6 +698,7 @@ const galleryImages = [
         lastDrawn = -1;
         loaded = 0;
         started = false;
+        isOnscreen = false;
         onProgress: ((loaded: number, total: number) => void) | null = null;
 
         constructor(el: HTMLElement, dwellCenters: number[]) {
@@ -743,9 +743,10 @@ const galleryImages = [
               ? await createImageBitmap(blob)
               : await new Promise<HTMLImageElement>((resolve, reject) => {
                   const img = new Image();
-                  img.onload = () => resolve(img);
-                  img.onerror = reject;
-                  img.src = URL.createObjectURL(blob);
+                  const url = URL.createObjectURL(blob);
+                  img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+                  img.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
+                  img.src = url;
                 });
           } catch {
             this.frames[i] = null; // nearest-neighbor fallback covers gaps
@@ -791,21 +792,13 @@ const galleryImages = [
           this.ctx.drawImage(img as CanvasImageSource, (cw - dw) / 2, (ch - dh) / 2, dw, dh);
         }
 
-        progress() {
-          const rect = this.el.getBoundingClientRect();
-          const total = rect.height - window.innerHeight;
-          if (total <= 0) return 0;
-          return Math.max(0, Math.min(1, -rect.top / total));
-        }
-
-        onscreen() {
-          const rect = this.el.getBoundingClientRect();
-          return rect.bottom > 0 && rect.top < window.innerHeight;
-        }
-
         tick() {
-          if (!this.onscreen()) return;
-          const raw = this.progress();
+          // one layout read per zone per frame: onscreen + progress from the same rect
+          const rect = this.el.getBoundingClientRect();
+          this.isOnscreen = rect.bottom > 0 && rect.top < window.innerHeight;
+          if (!this.isOnscreen) return;
+          const total = rect.height - window.innerHeight;
+          const raw = total > 0 ? Math.max(0, Math.min(1, -rect.top / total)) : 0;
           const eff = this.remap(raw);
           const target = eff * (FRAME_COUNT - 1);
           this.current += (target - this.current) * LERP_FACTOR;
@@ -873,10 +866,15 @@ const galleryImages = [
 
       // ---- main loop ----
       const tint = document.getElementById("tint")!;
+      let tintOn = false;
       function loop() {
         z1.tick();
         z2.tick();
-        tint.style.opacity = z1.onscreen() || z2.onscreen() ? "1" : "0";
+        const wantTint = z1.isOnscreen || z2.isOnscreen;
+        if (wantTint !== tintOn) {
+          tintOn = wantTint;
+          tint.style.opacity = wantTint ? "1" : "0";
+        }
         requestAnimationFrame(loop);
       }
       if (!REDUCED) requestAnimationFrame(loop);
@@ -995,17 +993,26 @@ const galleryImages = [
           (document.getElementById("reserve") as HTMLElement).offsetTop - 80,
         ];
       };
+      // cache section offsets — recomputing 6 offsetTops on every scroll event forces layout
+      let chapterPositions = chapterTargets();
+      const refreshChapters = () => { chapterPositions = chapterTargets(); };
       chapterBtns.forEach((btn, i) => {
-        btn.addEventListener("click", () => window.scrollTo({ top: chapterTargets()[i], behavior: REDUCED ? "auto" : "smooth" }));
+        btn.addEventListener("click", () => {
+          refreshChapters(); // layout may have shifted since the cache was taken
+          window.scrollTo({ top: chapterPositions[i], behavior: REDUCED ? "auto" : "smooth" });
+        });
       });
       function updateChapters() {
         const pos = window.scrollY + window.innerHeight * 0.4;
-        const targets = chapterTargets();
         let active = 0;
-        targets.forEach((t, i) => { if (pos >= t) active = i; });
+        chapterPositions.forEach((t, i) => { if (pos >= t) active = i; });
         chapterBtns.forEach((b, i) => b.classList.toggle("active", i === active));
       }
-      if (!IS_MOBILE) {
+      // CSS hides #chapters below 900px by width alone — gate on the same query, not IS_MOBILE
+      if (window.matchMedia("(min-width: 901px)").matches) {
+        // the async font swap reflows sections without firing a resize event
+        document.fonts?.ready.then(() => { refreshChapters(); updateChapters(); });
+        window.addEventListener("resize", refreshChapters);
         window.addEventListener("scroll", updateChapters, { passive: true });
         updateChapters();
       }
