@@ -28,24 +28,14 @@ const vision = sec("vision", {
   attribution: "The Architects",
 });
 const living = sec("living", {
-  overline: "Zone One — The Living Spaces",
+  overline: "The Living Spaces",
   title: "Rooms that breathe",
   body: "Double-height ceilings, raw stone and linen. Every room opens to the terrace, and the terrace opens to everything.",
 });
 const kitchen = sec("kitchen", {
-  overline: "Zone Two — The Kitchen",
+  overline: "The Kitchen",
   title: "The heart of the house",
   body: "A marble island carved from a single block, morning light across the counters, and room for everyone who claims to be helping.",
-});
-const craft = sec("craft", {
-  overline: "Crafted to Cook",
-  title: "Professional at heart",
-  body: "A full Gaggenau suite, twin ovens, a walk-in pantry and the kind of knives you write home about. Our private chef is one call away.",
-});
-const location = sec("location", {
-  overline: "The Setting",
-  title: "Perfectly placed",
-  body: "Twelve minutes from the old harbour town, forty from the airport, and a two-minute walk to the trailhead that starts it all.",
 });
 const cta = sec("cta", {
   overline: "Availability",
@@ -182,8 +172,8 @@ const galleryImages = [
     <!-- chapter markers -->
     <nav id="chapters" aria-label="Page sections">
       <button data-target="zone1" data-label="Arrival" aria-label="Go to Arrival"><span></span></button>
-      <button data-target="zone1-mid" data-label="Vision" aria-label="Go to Vision"><span></span></button>
-      <button data-target="zone2" data-label="Kitchen" aria-label="Go to Kitchen"><span></span></button>
+      <button data-target="zone1-living" data-label="Living" aria-label="Go to Living"><span></span></button>
+      <button data-target="zone1-kitchen" data-label="Kitchen" aria-label="Go to Kitchen"><span></span></button>
       <button data-target="amenities" data-label="Amenities" aria-label="Go to Amenities"><span></span></button>
       <button data-target="gallery" data-label="Gallery" aria-label="Go to Gallery"><span></span></button>
       <button data-target="reserve" data-label="Reserve" aria-label="Go to Reserve"><span></span></button>
@@ -196,7 +186,7 @@ const galleryImages = [
         <div class="stage-grad-left" aria-hidden="true"></div>
         <div class="stage-grad-bottom" aria-hidden="true"></div>
 
-        <div class="overlay overlay-left" data-show="0.00" data-hide="0.30">
+        <div class="overlay overlay-left" data-show="0.00" data-hide="0.14">
           <div class="overline">{hero.overline}</div>
           <h1 class="hero-title">
             <span data-split>{hero.title}</span>
@@ -216,14 +206,25 @@ const galleryImages = [
           </div>
         </div>
 
-        <div class="overlay overlay-left" data-show="0.38" data-hide="0.62">
+        <div class="overlay overlay-left" data-show="0.28" data-hide="0.48">
           <div class="quote-mark" aria-hidden="true">“</div>
           <blockquote class="quote">{vision.body}</blockquote>
           <div class="divider" aria-hidden="true"></div>
           <cite class="attribution">{vision.attribution}</cite>
         </div>
 
-        <div class="overlay overlay-left" data-show="0.70" data-hide="0.97">
+        <div class="overlay overlay-left" data-show="0.54" data-hide="0.68">
+          <div class="overline">{kitchen.overline}</div>
+          <h2 class="section-title">{kitchen.title}</h2>
+          <p class="section-body">{kitchen.body}</p>
+          <ul class="feature-list">
+            <li><span class="feature-dot" aria-hidden="true"></span>Full Gaggenau appliance suite</li>
+            <li><span class="feature-dot" aria-hidden="true"></span>Twelve-seat marble dining island</li>
+            <li><span class="feature-dot" aria-hidden="true"></span>Private chef on request</li>
+          </ul>
+        </div>
+
+        <div class="overlay overlay-left" data-show="0.78" data-hide="0.98">
           <div class="overline">{living.overline}</div>
           <h2 class="section-title">{living.title}</h2>
           <p class="section-body">{living.body}</p>
@@ -232,38 +233,6 @@ const galleryImages = [
             <li><span class="feature-dot" aria-hidden="true"></span>Five en-suite bedrooms across two wings</li>
             <li><span class="feature-dot" aria-hidden="true"></span>Shaded terraces on every level</li>
           </ul>
-        </div>
-      </div>
-    </section>
-
-    <!-- ZONE 2 — the kitchen -->
-    <section class="anim-zone" id="zone2" data-zone="2" aria-label="Villa Serena — the kitchen">
-      <div class="sticky-stage">
-        <canvas class="zone-canvas"></canvas>
-        <div class="stage-grad-left" aria-hidden="true"></div>
-        <div class="stage-grad-bottom" aria-hidden="true"></div>
-
-        <div class="overlay overlay-left" data-show="0.02" data-hide="0.32">
-          <div class="overline">{kitchen.overline}</div>
-          <h2 class="section-title big" data-split>{kitchen.title}</h2>
-          <p class="section-body">{kitchen.body}</p>
-        </div>
-
-        <div class="overlay overlay-left" data-show="0.40" data-hide="0.64">
-          <div class="overline">{craft.overline}</div>
-          <h2 class="section-title">{craft.title}</h2>
-          <p class="section-body">{craft.body}</p>
-          <ul class="feature-list">
-            <li><span class="feature-dot" aria-hidden="true"></span>Full Gaggenau appliance suite</li>
-            <li><span class="feature-dot" aria-hidden="true"></span>Twelve-seat marble dining island</li>
-            <li><span class="feature-dot" aria-hidden="true"></span>Private chef on request</li>
-          </ul>
-        </div>
-
-        <div class="overlay overlay-center" data-show="0.72" data-hide="0.98">
-          <div class="overline centered">{location.overline}</div>
-          <h2 class="section-title big centered">{location.title}</h2>
-          <p class="section-body centered">{location.body}</p>
         </div>
       </div>
     </section>
@@ -452,12 +421,12 @@ const galleryImages = [
       #chapters button:hover::after { opacity: 1; }
       @media (max-width: 900px) { #chapters { display: none; } }
 
-      /* animation zones */
-      .anim-zone { position: relative; height: 520vh; }
+      /* animation zone: one continuous flythrough with four dwell stops */
+      .anim-zone { position: relative; height: 640vh; }
       /* svh keeps the stage stable when the mobile URL bar collapses (no resize thrash) */
       .sticky-stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
       @media (max-width: 900px) {
-        .anim-zone { height: 380vh; }
+        .anim-zone { height: 460vh; }
       }
       .zone-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
       .stage-grad-left {
@@ -815,9 +784,8 @@ const galleryImages = [
       }
 
       const zone1El = document.getElementById("zone1")!;
-      const zone2El = document.getElementById("zone2")!;
-      const z1 = new Zone(zone1El, [0.1, 0.5, 0.84]);
-      const z2 = new Zone(zone2El, [0.12, 0.52, 0.86]);
+      // dwell stops: exterior, living room, kitchen, bedroom (motion-equalized timeline)
+      const z1 = new Zone(zone1El, [0.05, 0.38, 0.6, 0.88]);
 
       // ---- loader (tracks zone 1 critical set) ----
       const loader = document.getElementById("loader")!;
@@ -841,25 +809,12 @@ const galleryImages = [
       }
 
       if (REDUCED) {
-        // static experience: first frame per zone, everything visible
-        Promise.all([z1.loadFrame(0), z2.loadFrame(0)]).then(() => {
-          z1.draw(0); z2.draw(0); hideLoader();
-        });
+        // static experience: first frame, everything visible
+        z1.loadFrame(0).then(() => { z1.draw(0); hideLoader(); });
         document.querySelectorAll(".overlay").forEach((o) => o.classList.add("visible"));
         document.querySelectorAll(".reveal").forEach((o) => o.classList.add("in"));
       } else {
         z1.load(hideLoader);
-        // zone 2 lazy: start when its section approaches
-        const z2Trigger = new IntersectionObserver(
-          (entries) => {
-            if (entries.some((e) => e.isIntersecting)) {
-              z2.load();
-              z2Trigger.disconnect();
-            }
-          },
-          { rootMargin: "150% 0px" }
-        );
-        z2Trigger.observe(zone2El);
         // safety: hide loader even if a frame stalls
         setTimeout(hideLoader, 9000);
       }
@@ -869,8 +824,7 @@ const galleryImages = [
       let tintOn = false;
       function loop() {
         z1.tick();
-        z2.tick();
-        const wantTint = z1.isOnscreen || z2.isOnscreen;
+        const wantTint = z1.isOnscreen;
         if (wantTint !== tintOn) {
           tintOn = wantTint;
           tint.style.opacity = wantTint ? "1" : "0";
@@ -983,11 +937,12 @@ const galleryImages = [
       // ---- chapter markers ----
       const chapterBtns = Array.from(document.querySelectorAll<HTMLElement>("#chapters button"));
       const chapterTargets = () => {
-        const z1Top = zone1El.offsetTop, z1H = zone1El.offsetHeight;
+        const z1Top = zone1El.offsetTop;
+        const runway = zone1El.offsetHeight - window.innerHeight;
         return [
           z1Top,
-          z1Top + z1H * 0.45,
-          zone2El.offsetTop,
+          z1Top + runway * 0.38, // living room dwell
+          z1Top + runway * 0.6, // kitchen dwell
           (document.getElementById("amenities") as HTMLElement).offsetTop - 80,
           (document.getElementById("gallery") as HTMLElement).offsetTop - 80,
           (document.getElementById("reserve") as HTMLElement).offsetTop - 80,
