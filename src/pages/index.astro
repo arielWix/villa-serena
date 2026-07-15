@@ -186,7 +186,7 @@ const galleryImages = [
         <div class="stage-grad-left" aria-hidden="true"></div>
         <div class="stage-grad-bottom" aria-hidden="true"></div>
 
-        <div class="overlay overlay-left" data-show="0.00" data-hide="0.18">
+        <div class="overlay overlay-left" data-show="0.00" data-hide="0.14">
           <div class="overline">{hero.overline}</div>
           <h1 class="hero-title">
             <span data-split>{hero.title}</span>
@@ -206,14 +206,14 @@ const galleryImages = [
           </div>
         </div>
 
-        <div class="overlay overlay-left" data-show="0.26" data-hide="0.48">
+        <div class="overlay overlay-left" data-show="0.28" data-hide="0.48">
           <div class="quote-mark" aria-hidden="true">“</div>
           <blockquote class="quote">{vision.body}</blockquote>
           <div class="divider" aria-hidden="true"></div>
           <cite class="attribution">{vision.attribution}</cite>
         </div>
 
-        <div class="overlay overlay-left" data-show="0.56" data-hide="0.76">
+        <div class="overlay overlay-left" data-show="0.54" data-hide="0.68">
           <div class="overline">{kitchen.overline}</div>
           <h2 class="section-title">{kitchen.title}</h2>
           <p class="section-body">{kitchen.body}</p>
@@ -224,7 +224,7 @@ const galleryImages = [
           </ul>
         </div>
 
-        <div class="overlay overlay-left" data-show="0.82" data-hide="0.98">
+        <div class="overlay overlay-left" data-show="0.78" data-hide="0.98">
           <div class="overline">{living.overline}</div>
           <h2 class="section-title">{living.title}</h2>
           <p class="section-body">{living.body}</p>
@@ -784,8 +784,8 @@ const galleryImages = [
       }
 
       const zone1El = document.getElementById("zone1")!;
-      // dwell stops: exterior, living room, kitchen, bedroom
-      const z1 = new Zone(zone1El, [0.08, 0.36, 0.66, 0.9]);
+      // dwell stops: exterior, living room, kitchen, bedroom (motion-equalized timeline)
+      const z1 = new Zone(zone1El, [0.05, 0.38, 0.6, 0.88]);
 
       // ---- loader (tracks zone 1 critical set) ----
       const loader = document.getElementById("loader")!;
@@ -941,8 +941,8 @@ const galleryImages = [
         const runway = zone1El.offsetHeight - window.innerHeight;
         return [
           z1Top,
-          z1Top + runway * 0.36, // living room dwell
-          z1Top + runway * 0.66, // kitchen dwell
+          z1Top + runway * 0.38, // living room dwell
+          z1Top + runway * 0.6, // kitchen dwell
           (document.getElementById("amenities") as HTMLElement).offsetTop - 80,
           (document.getElementById("gallery") as HTMLElement).offsetTop - 80,
           (document.getElementById("reserve") as HTMLElement).offsetTop - 80,
