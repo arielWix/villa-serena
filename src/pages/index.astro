@@ -590,6 +590,24 @@ const galleryImages = [
         .static-section { padding: 90px 0; }
       }
 
+      /* mobile readability: the tracked micro-labels are too small on phones */
+      @media (max-width: 900px) {
+        .overline { font-size: 12px; letter-spacing: 0.22em; }
+        .hero-tag { font-size: 16px; }
+        .section-body { font-size: 16px; }
+        .stat-label { font-size: 10px; letter-spacing: 0.18em; }
+        .attribution { font-size: 12px; letter-spacing: 0.22em; }
+        .feature-list li { font-size: 15px; }
+        .amenity-desc { font-size: 14px; }
+        .glass-form label { font-size: 11px; letter-spacing: 0.18em; }
+        .form-status { font-size: 14px; }
+        .btn-primary, .btn-ghost { font-size: 12px; letter-spacing: 0.2em; }
+        .loader-sub { font-size: 11px; }
+        .loader-pct { font-size: 12px; }
+        .footer-legal { font-size: 12px; }
+        .footer-brand { font-size: 16px; }
+      }
+
       footer { background: #131110; padding: 60px 0 46px; text-align: center; }
       .footer-brand { font-family: var(--heading); letter-spacing: 0.3em; text-transform: uppercase; font-size: 15px; color: var(--warm-white-dim); }
       .footer-legal { margin-top: 12px; font-size: 11px; color: var(--concrete-dim); letter-spacing: 0.06em; }
