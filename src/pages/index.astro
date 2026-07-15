@@ -722,9 +722,12 @@ const galleryImages = [
           const w = this.canvas.clientWidth, h = this.canvas.clientHeight;
           this.canvas.width = Math.round(w * DPR);
           this.canvas.height = Math.round(h * DPR);
-          // setting width resets context state — reapply the upscale filter
+          // setting width resets context state — reapply the upscale filter.
+          // "high" is a CPU multi-pass resample: ~66ms/draw at desktop size vs
+          // 0.37ms for "medium" (GPU bilinear) — it caused a visible hitch on
+          // every frame advance, felt as scroll lag
           this.ctx.imageSmoothingEnabled = true;
-          this.ctx.imageSmoothingQuality = "high";
+          this.ctx.imageSmoothingQuality = "medium";
         }
 
         async fetchFrame(i: number): Promise<void> {
