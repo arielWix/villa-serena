@@ -824,12 +824,17 @@ const galleryImages = [
       const fill = document.getElementById("loader-fill")!;
       const pct = document.getElementById("loader-pct")!;
       const CRITICAL_TOTAL = Math.ceil(FRAME_COUNT / 4);
+      // reveal at 75% of the critical set — waiting for the last parallel
+      // stragglers (or a 500-retry) parks the bar near the end for seconds
+      // while the film underneath is already viewable
+      const REVEAL_AT = Math.ceil(CRITICAL_TOTAL * 0.75);
       let loaderHidden = false;
       z1.onProgress = (loaded) => {
         if (loaderHidden) return;
-        const p = Math.min(100, Math.round((loaded / CRITICAL_TOTAL) * 100));
+        const p = Math.min(100, Math.round((loaded / REVEAL_AT) * 100));
         fill.style.width = p + "%";
         pct.textContent = p + "%";
+        if (loaded >= REVEAL_AT && z1.frames[0]) hideLoader();
       };
       function hideLoader() {
         if (loaderHidden) return;
