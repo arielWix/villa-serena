@@ -85,21 +85,60 @@ const pageTitle = "Villa Serena — A Private Mediterranean Estate";
 const pageDescription =
   "Villa Serena — a private luxury villa for rent. Five suites, an 18-metre infinity pool and a chef's kitchen, framed by olive groves and sea light.";
 const ogImage = origin + "/gallery/villa-01.webp";
-const jsonLd = JSON.stringify({
-  "@context": "https://schema.org",
-  "@type": "LodgingBusiness",
-  name: "Villa Serena",
-  description: pageDescription,
-  url: canonical,
-  image: [1, 2, 3, 4].map((n) => `${origin}/gallery/villa-0${n}.webp`),
-  numberOfRooms: 5,
-  amenityFeature: [
-    { "@type": "LocationFeatureSpecification", name: "Infinity Pool", value: true },
-    { "@type": "LocationFeatureSpecification", name: "Chef's Kitchen", value: true },
-    { "@type": "LocationFeatureSpecification", name: "Spa & Sauna", value: true },
-    { "@type": "LocationFeatureSpecification", name: "Concierge", value: true },
-  ],
-});
+// FAQ content: single source for the visible section and the FAQPage schema
+const faqs = [
+  {
+    q: "How many guests can Villa Serena host?",
+    a: "Villa Serena hosts up to ten guests in five en-suite bedroom suites, arranged across two wings of the estate.",
+  },
+  {
+    q: "Does the villa have a pool?",
+    a: "Yes — an 18-metre heated infinity pool with an edge that dissolves into the valley below, surrounded by shaded terraces.",
+  },
+  {
+    q: "What amenities are included?",
+    a: "A chef's kitchen with a full Gaggenau suite, a temperature-controlled wine cellar, an outdoor cinema, a cedar sauna and spa suite, a three-acre olive grove, discreet smart-home automation, and a round-the-clock concierge with a private chef on request.",
+  },
+  {
+    q: "Where is Villa Serena located?",
+    a: "On a private Mediterranean hillside estate — twelve minutes from the old harbour town, forty minutes from the airport, and a two-minute walk to the coastal trailhead.",
+  },
+  {
+    q: "How do I book a stay?",
+    a: "All stays are by inquiry. Send your dates and party size through the booking form and the villa team replies within a day.",
+  },
+];
+
+const jsonLd = JSON.stringify([
+  {
+    "@context": "https://schema.org",
+    "@type": "LodgingBusiness",
+    name: "Villa Serena",
+    description: pageDescription,
+    url: canonical,
+    image: [1, 2, 3, 4].map((n) => `${origin}/gallery/villa-0${n}.webp`),
+    numberOfRooms: 5,
+    amenityFeature: amenities.map((a) => ({
+      "@type": "LocationFeatureSpecification",
+      name: a.title,
+      value: true,
+    })),
+    potentialAction: {
+      "@type": "ReserveAction",
+      target: `${canonical}#reserve`,
+      name: "Send a booking inquiry",
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  },
+]);
 const fontsHref =
   "https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Playfair+Display:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap";
 
@@ -264,6 +303,22 @@ const galleryImages = [
             <figure class={`gallery-item reveal ${g.tall ? "tall" : ""}`} data-parallax={g.parallax}>
               <img src={g.src} alt={g.alt} loading="lazy" decoding="async" />
             </figure>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="static-section" id="faq" aria-label="Frequently asked questions">
+      <div class="container narrow">
+        <div class="overline centered reveal">Good to Know</div>
+        <h2 class="section-title centered reveal">Questions, answered</h2>
+        <div class="faq-list reveal">
+          {faqs.map((f) => (
+            <details class="faq-item">
+              <summary><h3>{f.q}</h3><span class="faq-mark" aria-hidden="true">+</span></summary>
+              <p>{f.a}</p>
+            </details>
           ))}
         </div>
       </div>
@@ -542,6 +597,25 @@ const galleryImages = [
         transition: transform 0.8s cubic-bezier(0.2, 0.6, 0.2, 1); will-change: transform;
       }
       .gallery-item:hover img { transform: scale(1.03); }
+
+      /* faq */
+      .faq-list { margin-top: 40px; border-top: 1px solid rgba(244, 240, 234, 0.08); }
+      .faq-item { border-bottom: 1px solid rgba(244, 240, 234, 0.08); }
+      .faq-item summary {
+        display: flex; align-items: baseline; justify-content: space-between; gap: 18px;
+        padding: 22px 4px; cursor: pointer; list-style: none;
+      }
+      .faq-item summary::-webkit-details-marker { display: none; }
+      .faq-item summary h3 {
+        font-family: var(--heading); font-weight: 400; font-size: 18px; line-height: 1.4;
+      }
+      .faq-mark { color: var(--accent); font-size: 20px; flex: none; transition: transform 0.3s ease; }
+      .faq-item[open] .faq-mark { transform: rotate(45deg); }
+      .faq-item p {
+        padding: 0 4px 24px; max-width: 60ch;
+        color: var(--warm-white-dim); font-size: 15px; line-height: 1.75;
+      }
+      @media (max-width: 640px) { .faq-item summary h3 { font-size: 16px; } .faq-item p { font-size: 16px; } }
 
       /* form */
       .glass-form {
