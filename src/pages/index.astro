@@ -414,6 +414,9 @@ const galleryImages = [
         overflow-x: clip;
         cursor: none;
       }
+      /* avoid single-word last lines (orphans) in copy, and balance headings */
+      p, .hero-tag, .section-body, .amenity-desc, .lede, .faq-item p { text-wrap: pretty; }
+      h1, h2, h3, .section-title, .amenity-title { text-wrap: balance; }
       @media (hover: none), (max-width: 900px) {
         body { cursor: auto; }
         #cursor-dot, #cursor-ring { display: none; }
