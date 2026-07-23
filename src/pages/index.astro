@@ -210,8 +210,8 @@ const galleryImages = [
 
     <!-- top header -->
     <header class="site-header" id="site-header">
-      <a class="site-brand" href="#zone1" data-scroll="zone1" aria-label="Villa Serena — back to top">Villa Serena</a>
       <nav class="site-nav" aria-label="Primary">
+        <a class="nav-brand" href="#zone1" data-scroll="zone1" aria-label="The Villa — back to top">The Villa</a>
         <a href="#amenities" data-scroll="amenities">Amenities</a>
         <a href="#gallery" data-scroll="gallery">Gallery</a>
         <a href="#faq" data-scroll="faq">FAQ</a>
@@ -466,18 +466,13 @@ const galleryImages = [
       /* top header */
       .site-header {
         position: fixed; top: 0; left: 0; right: 0; z-index: 60;
-        display: flex; align-items: center; justify-content: space-between;
+        display: flex; align-items: center; justify-content: flex-end;
         padding: 26px 48px;
         background: linear-gradient(to bottom, rgba(14, 13, 12, 0.55), rgba(14, 13, 12, 0));
         pointer-events: none;
       }
       .site-header a { pointer-events: auto; }
-      .site-brand {
-        font-family: var(--heading); font-size: 21px; letter-spacing: 0.12em;
-        color: var(--warm-white); text-decoration: none;
-        text-shadow: 0 1px 12px rgba(0, 0, 0, 0.4);
-      }
-      .site-nav { display: flex; gap: 42px; }
+      .site-nav { display: flex; align-items: center; gap: 42px; }
       .site-nav a {
         font-family: var(--body); font-size: 11px; font-weight: 500;
         letter-spacing: 0.26em; text-transform: uppercase;
@@ -486,10 +481,11 @@ const galleryImages = [
         transition: color 0.3s ease;
       }
       .site-nav a:hover { color: var(--accent); }
+      .site-nav .nav-brand { color: var(--warm-white); font-weight: 600; }
       @media (max-width: 900px) {
         .site-header { padding: 18px 22px; }
-        .site-brand { font-size: 17px; }
-        .site-nav { display: none; }
+        .site-nav { gap: 0; }
+        .site-nav a:not(.nav-brand) { display: none; }
       }
 
       /* chapters */
