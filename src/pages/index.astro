@@ -237,7 +237,15 @@ const galleryImages = [
         <div class="stage-grad-bottom" aria-hidden="true"></div>
 
         <div class="overlay overlay-left" data-show="0.00" data-hide="0.14">
-          <div class="overline">{hero.overline}</div>
+          <div class="overline">
+            {hero.overline.includes("·") ? (
+              <>
+                <span>{hero.overline.split("·")[0].trim()}</span>
+                <span class="overline-sep"> · </span>
+                <span class="overline-tag">{hero.overline.split("·").slice(1).join("·").trim()}</span>
+              </>
+            ) : hero.overline}
+          </div>
           <h1 class="hero-title">
             <span data-split>{hero.title}</span>
             <span class="sr-only">— a private luxury villa rental on the Mediterranean coast</span>
@@ -710,6 +718,8 @@ const galleryImages = [
       /* mobile readability: the tracked micro-labels are too small on phones */
       @media (max-width: 900px) {
         .overline { font-size: 12px; letter-spacing: 0.22em; }
+        .overline .overline-sep { display: none; }
+        .overline .overline-tag { display: block; white-space: nowrap; }
         .hero-tag { font-size: 16px; }
         .section-body { font-size: 16px; }
         .stat-label { font-size: 10px; letter-spacing: 0.18em; }
